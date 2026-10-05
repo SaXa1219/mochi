@@ -5948,6 +5948,9 @@ m.dataset.mk = msgKeyOf(rec); // FIX 2026-09-15 #491 身份锚随渲染写入，
 // 下面 13 处分支各自重写一遍下标（#766 的口径），全部改读 __msgAt＝「这一格到底是哪一格」。
 const __msgAt = Number.isFinite(atIdx) ? atIdx : msgs.length - 1;
 m.dataset.idx = __msgAt;
+// 消息方向锚：in=对方 / out=我。与下标锚同时写入，所有分支（含提前 return 的卡片）共用；
+// 聊天设置→美化「对方互动卡透明度」据 [data-side="in"] 只淡化对方发来的礼物/提问卡。
+m.dataset.side = rec.side === 'out' ? 'out' : 'in';
 // #878：msg-enter 不在此处加——下面各分支的 m.className=… 整体覆盖会把它抹掉，
 // 统一由 appendMsg 挂载前补加（见其定义处注释）。
 const __fit = rec.side !== 'out' && !!window.taFit;
@@ -10387,6 +10390,21 @@ if (morePoke) {
 morePoke.addEventListener('click', (e) => {
 e.stopPropagation();
 openPokeCard();
+});
+}
+// 摸一摸：互动面板入口。复用拍一拍的发送链路（sendPoke＝同一套 {me}/{ta} 占位与 TA 回拍逻辑），
+// 只换一组「摸」的动作短语；点选即发（pillSubmit），无需再点确定。
+const moreTouch = document.getElementById('more-touch');
+if (moreTouch) {
+moreTouch.addEventListener('click', (e) => {
+e.stopPropagation();
+if (morePanel) morePanel.hidden = true;
+if (!window.openModal) { sendPoke('摸一摸你'); return; }
+const TOUCH_ACTS = ['摸摸头', '捏捏脸', '戳戳脸颊', '揉揉头发', '牵起手', '抱一下', '蹭一蹭', '拍拍肩膀'];
+window.openModal('摸一摸', '', (v) => {
+const a = TOUCH_ACTS[Number(v)];
+if (a) sendPoke(a);
+}, { noInput: true, pillSubmit: true, pills: TOUCH_ACTS.map((label, value) => ({ label: label, value: value })) });
 });
 }
 const rpsPanel = document.getElementById('chat-rps-panel');

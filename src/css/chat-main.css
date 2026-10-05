@@ -1922,4 +1922,14 @@ html.tablet #page-chat.cs-bg-on > #cs-bg-layer { min-height:100vh; min-height:ma
 [data-theme="dark"] .msg-voice-play.voice-play-btn { background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.16); }
 [data-theme="dark"] .voice-rec-btn { border-color:rgba(255,255,255,.28); color:#fff; }
 
+/* ---- 对方互动卡透明度（聊天设置→美化「对方互动卡透明度」写入 --cs-recv-opacity，1=原样） ----
+   只命中对方发来的礼物 / 红包 / 送花 / 提问卡（[data-side="in"]，由 chat.js renderMsg 统一写入），
+   我方发出的同族卡片（data-side="out"）不受影响。红包已过期档自带 .6，用 :not(.expired) 让位。 */
+#page-chat .msg-gift[data-side="in"] .msg-gift-card,
+#page-chat .msg-flower[data-side="in"] .msg-flower-card,
+#page-chat .msg-rp[data-side="in"] .msg-rp-card:not(.expired),
+#page-chat .msg-ask[data-side="in"] .msg-ask-card,
+#page-chat .msg-ask[data-side="in"] .msg-choose-card,
+#page-chat .msg-ask[data-side="in"] .msg-survey-card { opacity: var(--cs-recv-opacity, 1); }
+
 

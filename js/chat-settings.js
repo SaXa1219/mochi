@@ -221,7 +221,8 @@ const CHAT_SURFACE_SETTINGS = [
 { key: 'cs-input-opacity', label: '底部输入栏不透明度', def: 92, max: 100, unit: '%' },
 { key: 'cs-bubble-opacity', label: '气泡底色不透明度', def: 100, max: 100, unit: '%' },
 { key: 'cs-head-inset', label: '顶部栏上下移动', def: 0, max: 80, min: -80, unit: 'px', posHint: '正值下移、负值上移' },
-{ key: 'cs-input-inset', label: '底部栏上下移动', def: 0, max: 80, min: -80, unit: 'px', posHint: '正值上移、负值下移' }
+{ key: 'cs-input-inset', label: '底部栏上下移动', def: 0, max: 80, min: -80, unit: 'px', posHint: '正值上移、负值下移' },
+{ key: 'cs-recv-opacity', label: '对方互动卡不透明度', def: 100, max: 100, unit: '%' }
 ];
 const CS_BG_FITS = [
 { label: '铺满裁剪', value: 'fill' },
@@ -323,6 +324,7 @@ setVar(chatPage, '--cs-' + side + '-surface', rgb ? 'rgba(' + rgb.join(',') + ',
 const labels = {
 'cs-bar-op-val': '顶 ' + values[0] + '% / 底 ' + values[1] + '%',
 'cs-bubble-op-val': values[2] + '% 不透明',
+'cs-recv-op-val': values[5] >= 100 ? '不透明' : values[5] + '% 不透明',
 'cs-bar-pos-val': '顶 ' + surfaceArrow(values[3], '↓', '↑') + ' / 底 ' + surfaceArrow(values[4], '↑', '↓') + 'px',
 'cs-typing-ink-val': store.get('cs-typing-ink') || '#8a8a8a'
 };
@@ -1098,6 +1100,8 @@ bindChatSurfaceGroup('cs-bar-op', '选择要调整的栏背景', [0, 1]);
 bindChatSurfaceGroup('cs-bar-pos', '选择要微调的位置（仅当前桌面）', [3, 4]);
 const bubbleOpacityRow = row('cs-bubble-op');
 if (bubbleOpacityRow) bubbleOpacityRow.addEventListener('click', () => editChatSurface(2));
+const recvOpacityRow = row('cs-recv-op');
+if (recvOpacityRow) recvOpacityRow.addEventListener('click', () => editChatSurface(5));
 bindBubbleColorRow('cs-typing-ink', 'cs-typing-ink', '#8a8a8a', '对方正在输入文字颜色', [{ color: '#8a8a8a', label: '默认灰' }].concat(BUBBLE_INK_COLORS));
 bindBubbleColorRow('cs-ph-ink', 'cs-ph-ink', '#b5b5b5', '输入框提示文字颜色', [{ color: '#b5b5b5', label: '默认灰' }].concat(BUBBLE_INK_COLORS));
 bindBubbleColorRow('cs-out-bg', 'cs-out-bg', '#111111', '我的气泡颜色', BUBBLE_BG_COLORS);
@@ -1536,15 +1540,55 @@ toast(hint || '气泡样式已应用');
 });
 }
 applyCss();
+const csGlobalCssRow = row('cs-global-css');
+const CSS_GLOBAL_KEY = 'cs-global-css';
+function applyGlobalCss() {
+const old = document.getElementById('cs-global-style');
+const css = String(store.get(CSS_GLOBAL_KEY) || '').trim();
+const setVal = document.getElementById('cs-global-css-val');
+if (setVal) setVal.textContent = css ? '已设置' : '默认';
+if (!css) { if (old) old.remove(); return; }
+const out = css.indexOf('{') >= 0 ? css : '#page-chat{' + css + '}';
+if (old) { if (old.textContent !== out) old.textContent = out; return; }
+const st = document.createElement('style');
+st.id = 'cs-global-style';
+st.textContent = out;
+document.head.appendChild(st);
+}
+if (csGlobalCssRow) {
+csGlobalCssRow.addEventListener('click', () => {
+if (!window.openTCPanel) return;
+window.openTCPanel('全局 CSS', '' +
+'<div class="sm-fld-hint" style="margin-bottom:8px">写 CSS 改变整个聊天的样子：<br>· 带选择器按原样生效，如 <code>#page-chat .msg-time{color:#f00}</code><br>· 只写声明（无 <code>{}</code>）时作用于聊天页容器，如 <code>font-size:15px</code><br>注意：会直接注入页面，写错可能影响显示，清空即可恢复。</div>' +
+'<textarea id="cs-global-css-input" class="tc-input" rows="8" placeholder="#page-chat .msg-bubble{' + '&#10;border-radius:4px;' + '&#10;}"></textarea>' +
+'<div class="mail-actions"><button class="cc-tool" id="cs-global-css-clear">清空</button><button class="cc-tool" id="cs-global-css-ok">应用</button></div>');
+const ta = document.getElementById('cs-global-css-input');
+if (ta) ta.value = store.get(CSS_GLOBAL_KEY) || '';
+document.getElementById('cs-global-css-clear').addEventListener('click', () => {
+store.remove(CSS_GLOBAL_KEY);
+document.getElementById('tc-mask').hidden = true;
+applyGlobalCss();
+toast('已清空全局样式');
+});
+document.getElementById('cs-global-css-ok').addEventListener('click', () => {
+const v = cssReadVal(document.getElementById('cs-global-css-input')).trim();
+store.set(CSS_GLOBAL_KEY, v);
+document.getElementById('tc-mask').hidden = true;
+applyGlobalCss();
+toast(v ? '全局样式已应用' : '全局样式已清空');
+});
+});
+}
+applyGlobalCss();
 const gStoreChat = window.xyStore('xy-home-v2');
 const CHAT_SCHEMES_KEY = 'chat-beauty-schemes';
 const CHAT_BEAUTY_KEYS = [
-'cs-bg', 'cs-bubble-css', 'cs-font', 'cs-font-size', 'cs-bubble-size',
+'cs-bg', 'cs-bubble-css', 'cs-global-css', 'cs-font', 'cs-font-size', 'cs-bubble-size',
 'cs-bubble-radius', 'cs-av-shape', 'cs-time-style', 'cs-time-ink', 'cs-typing-ink',
 'cs-out-bg', 'cs-out-ink', 'cs-in-bg', 'cs-in-ink',
 'cs-send-bg', 'cs-send-ink', 'cs-send-show',
 'cs-ph-ink', 'cs-ph-show',
-'cs-head-opacity', 'cs-input-opacity', 'cs-bubble-opacity', 'cs-head-inset', 'cs-input-inset',
+'cs-head-opacity', 'cs-input-opacity', 'cs-bubble-opacity', 'cs-recv-opacity', 'cs-head-inset', 'cs-input-inset',
 'cs-bg-fit', 'cs-bg-fullbars', 'cs-bg-pos-x', 'cs-bg-pos-y', 'cs-bg-size'
 ];
 const getChatSchemes = () => {
@@ -1574,7 +1618,7 @@ return data;
 const applyChatBeautyData = (data) => {
 let n = 0;
 CHAT_BEAUTY_KEYS.forEach(k => { if (data[k] !== undefined) { store.set(k, data[k]); n++; } });
-try { applySettings(); applyCss(); applyFont(); } catch (e) {}
+try { applySettings(); applyCss(); applyGlobalCss(); applyFont(); } catch (e) {}
 try { csFontChanged(); } catch (e) {}
 return n;
 };
@@ -2072,11 +2116,13 @@ try { demoteFontGlobal(); } catch (e) {}
 try { applyFont(); } catch (e) {}
 try { applyProfile(); } catch (e) {}
 try { applyCss(); } catch (e) {}
+try { applyGlobalCss(); } catch (e) {}
 });
 document.addEventListener('contact-switched', function () {
 try { applySettings(); } catch (e) {}
 try { applyProfile(); } catch (e) {}
 try { applyCss(); } catch (e) {}
+try { applyGlobalCss(); } catch (e) {}
 try { applyFont(); } catch (e) {}
 });
 const _csTicker = { fns: [], timer: 0 };

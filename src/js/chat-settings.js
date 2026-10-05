@@ -350,7 +350,10 @@
     // #708：位置微调改双向——正值保持原方向（顶栏下移/底栏上移），负值反向
     //（顶栏上移/底栏下移）；存值语义不变，旧数据 0~80 的含义原样兼容。
     { key: 'cs-head-inset', label: '顶部栏上下移动', def: 0, max: 80, min: -80, unit: 'px', posHint: '正值下移、负值上移' },
-    { key: 'cs-input-inset', label: '底部栏上下移动', def: 0, max: 80, min: -80, unit: 'px', posHint: '正值上移、负值下移' }
+    { key: 'cs-input-inset', label: '底部栏上下移动', def: 0, max: 80, min: -80, unit: 'px', posHint: '正值上移、负值下移' },
+    // 对方互动卡不透明度（追加在末尾＝不动 0~4 的下标语义）：只淡化对方发来的礼物/红包/送花/
+    // 提问卡（渲染侧按 [data-side="in"] 命中），我方发出的同族卡片不受影响。100 = 原样，越低越透明。
+    { key: 'cs-recv-opacity', label: '对方互动卡不透明度', def: 100, max: 100, unit: '%' }
   ];
   // #708：统一钳制（位置两项 min=-80 双向；其余项无 min 按 0 起单向上限）
   // #731 聊天壁纸「铺满方式」：把写死的 cover 变成用户可选的一档。
@@ -492,6 +495,7 @@
     const labels = {
       'cs-bar-op-val': '顶 ' + values[0] + '% / 底 ' + values[1] + '%',
       'cs-bubble-op-val': values[2] + '% 不透明',
+      'cs-recv-op-val': values[5] >= 100 ? '不透明' : values[5] + '% 不透明',
       'cs-bar-pos-val': '顶 ' + surfaceArrow(values[3], '↓', '↑') + ' / 底 ' + surfaceArrow(values[4], '↑', '↓') + 'px',
       'cs-typing-ink-val': store.get('cs-typing-ink') || '#8a8a8a'
     };
@@ -1483,6 +1487,9 @@
   bindChatSurfaceGroup('cs-bar-pos', '选择要微调的位置（仅当前桌面）', [3, 4]);
   const bubbleOpacityRow = row('cs-bubble-op');
   if (bubbleOpacityRow) bubbleOpacityRow.addEventListener('click', () => editChatSurface(2));
+  // 对方互动卡透明度：滑块形态与气泡透明度同款，作用在 --cs-recv-opacity（见 chat-main.css）
+  const recvOpacityRow = row('cs-recv-op');
+  if (recvOpacityRow) recvOpacityRow.addEventListener('click', () => editChatSurface(5));
   bindBubbleColorRow('cs-typing-ink', 'cs-typing-ink', '#8a8a8a', '对方正在输入文字颜色', [{ color: '#8a8a8a', label: '默认灰' }].concat(BUBBLE_INK_COLORS));
   // #1026：输入框提示文字颜色（「说点什么…」那几个灰字）。色板首项＝主题默认灰，选它等价于不覆盖。
   bindBubbleColorRow('cs-ph-ink', 'cs-ph-ink', '#b5b5b5', '输入框提示文字颜色', [{ color: '#b5b5b5', label: '默认灰' }].concat(BUBBLE_INK_COLORS));
@@ -2020,19 +2027,64 @@
   }
   applyCss();
 
+  // ================= 全局 CSS（作用于整个聊天页的自定义样式） =================
+  // 与气泡 CSS 的区别：气泡 CSS 由 mochiMapBubbleCss 收敛到双方气泡元素；本项按用户原样注入，
+  // 用来整体重排聊天页外观。与其它聊天美化项一致，按联系人保存（cs-global-css），切换联系人重应用。
+  const csGlobalCssRow = row('cs-global-css');
+  const CSS_GLOBAL_KEY = 'cs-global-css';
+  function applyGlobalCss() {
+    const old = document.getElementById('cs-global-style');
+    const css = String(store.get(CSS_GLOBAL_KEY) || '').trim();
+    const setVal = document.getElementById('cs-global-css-val');
+    if (setVal) setVal.textContent = css ? '已设置' : '默认';
+    if (!css) { if (old) old.remove(); return; }
+    // 带 { 视为完整规则（含选择器）按原样生效；只有声明时兜底整包作用到聊天页容器。
+    const out = css.indexOf('{') >= 0 ? css : '#page-chat{' + css + '}';
+    if (old) { if (old.textContent !== out) old.textContent = out; return; }
+    const st = document.createElement('style');
+    st.id = 'cs-global-style';
+    st.textContent = out;
+    document.head.appendChild(st);
+  }
+  if (csGlobalCssRow) {
+    csGlobalCssRow.addEventListener('click', () => {
+      if (!window.openTCPanel) return;
+      window.openTCPanel('全局 CSS', '' +
+        '<div class="sm-fld-hint" style="margin-bottom:8px">写 CSS 改变整个聊天的样子：<br>· 带选择器按原样生效，如 <code>#page-chat .msg-time{color:#f00}</code><br>· 只写声明（无 <code>{}</code>）时作用于聊天页容器，如 <code>font-size:15px</code><br>注意：会直接注入页面，写错可能影响显示，清空即可恢复。</div>' +
+        '<textarea id="cs-global-css-input" class="tc-input" rows="8" placeholder="#page-chat .msg-bubble{' + '&#10;border-radius:4px;' + '&#10;}"></textarea>' +
+        '<div class="mail-actions"><button class="cc-tool" id="cs-global-css-clear">清空</button><button class="cc-tool" id="cs-global-css-ok">应用</button></div>');
+      const ta = document.getElementById('cs-global-css-input');
+      if (ta) ta.value = store.get(CSS_GLOBAL_KEY) || '';
+      document.getElementById('cs-global-css-clear').addEventListener('click', () => {
+        store.remove(CSS_GLOBAL_KEY);
+        document.getElementById('tc-mask').hidden = true;
+        applyGlobalCss();
+        toast('已清空全局样式');
+      });
+      document.getElementById('cs-global-css-ok').addEventListener('click', () => {
+        const v = cssReadVal(document.getElementById('cs-global-css-input')).trim();
+        store.set(CSS_GLOBAL_KEY, v);
+        document.getElementById('tc-mask').hidden = true;
+        applyGlobalCss();
+        toast(v ? '全局样式已应用' : '全局样式已清空');
+      });
+    });
+  }
+  applyGlobalCss();
+
   // ================= v3.18.x：聊天美化方案（全局保存，所有联系人桌面通用） =================
   // 用户需求：聊天设置里也能像手机桌面美化一样，把气泡颜色/CSS、壁纸、字体、时间轴等
   // 全部美化保存成方案；保存后切换联系人/桌面依然可见，可一键应用（读当前桌面的 activeStore）。
   const gStoreChat = window.xyStore('xy-home-v2');
   const CHAT_SCHEMES_KEY = 'chat-beauty-schemes';
   const CHAT_BEAUTY_KEYS = [
-    'cs-bg', 'cs-bubble-css', 'cs-font', 'cs-font-size', 'cs-bubble-size',
+    'cs-bg', 'cs-bubble-css', 'cs-global-css', 'cs-font', 'cs-font-size', 'cs-bubble-size',
     'cs-bubble-radius', 'cs-av-shape', 'cs-time-style', 'cs-time-ink', 'cs-typing-ink',
     'cs-out-bg', 'cs-out-ink', 'cs-in-bg', 'cs-in-ink',
     'cs-send-bg', 'cs-send-ink', 'cs-send-show',
     // #1026：输入框提示文字（颜色 + 显隐）——观感项，方案切换时要一起走
     'cs-ph-ink', 'cs-ph-show',
-    'cs-head-opacity', 'cs-input-opacity', 'cs-bubble-opacity', 'cs-head-inset', 'cs-input-inset',
+    'cs-head-opacity', 'cs-input-opacity', 'cs-bubble-opacity', 'cs-recv-opacity', 'cs-head-inset', 'cs-input-inset',
     // #731：壁纸铺满方式 + 壁纸延伸到栏位（同一份美化方案应记住这两个观感开关）
     // #782：壁纸位置与缩放三键（方案/备份/导入必须一起走，否则换桌面图就跳位）
     'cs-bg-fit', 'cs-bg-fullbars', 'cs-bg-pos-x', 'cs-bg-pos-y', 'cs-bg-size'
@@ -2071,7 +2123,7 @@
   const applyChatBeautyData = (data) => {
     let n = 0;
     CHAT_BEAUTY_KEYS.forEach(k => { if (data[k] !== undefined) { store.set(k, data[k]); n++; } });
-    try { applySettings(); applyCss(); applyFont(); } catch (e) {}
+    try { applySettings(); applyCss(); applyGlobalCss(); applyFont(); } catch (e) {}
     try { csFontChanged(); } catch (e) {}
     return n;
   };
@@ -2637,6 +2689,8 @@
     // 读空不注入），字体/头像此前有本兜底而气泡 CSS 漏了 → 重进后回退默认气泡。
     // applyCss 幂等：会话内已写入时 memoryCache 值更新，重应用无副作用
     try { applyCss(); } catch (e) {}
+    // 全局 CSS 同气泡 CSS：boot 时可能早于 IDB 回填，回填完成补应用一次（applyGlobalCss 幂等）
+    try { applyGlobalCss(); } catch (e) {}
   });
   // v3.6.x：多桌面——切换联系人后重新应用聊天美化（壁纸/气泡颜色/字号/形状/字体均按新桌面）
   // v3.9.x 修复：气泡 CSS / 全局字体也是按联系人存储（cs-bubble-css / cs-font），但注入的
@@ -2647,6 +2701,8 @@
     try { applySettings(); } catch (e) {}
     try { applyProfile(); } catch (e) {}
     try { applyCss(); } catch (e) {}
+    // 全局 CSS 同气泡 CSS：按联系人存储，切桌面必须一并重应用/清除，否则盖到别的联系人桌面
+    try { applyGlobalCss(); } catch (e) {}
     try { applyFont(); } catch (e) {}
   });
 

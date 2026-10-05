@@ -4306,6 +4306,7 @@ const m = document.createElement('div');
 m.dataset.mk = msgKeyOf(rec); // FIX 2026-09-15 #491 身份锚随渲染写入，批量渲染只覆盖 data-idx 不动它
 const __msgAt = Number.isFinite(atIdx) ? atIdx : msgs.length - 1;
 m.dataset.idx = __msgAt;
+m.dataset.side = rec.side === 'out' ? 'out' : 'in';
 const __fit = rec.side !== 'out' && !!window.taFit;
 const __taNm = chatPartnerName();
 const __meNm = chatUserName();
@@ -7801,6 +7802,19 @@ if (morePoke) {
 morePoke.addEventListener('click', (e) => {
 e.stopPropagation();
 openPokeCard();
+});
+}
+const moreTouch = document.getElementById('more-touch');
+if (moreTouch) {
+moreTouch.addEventListener('click', (e) => {
+e.stopPropagation();
+if (morePanel) morePanel.hidden = true;
+if (!window.openModal) { sendPoke('摸一摸你'); return; }
+const TOUCH_ACTS = ['摸摸头', '捏捏脸', '戳戳脸颊', '揉揉头发', '牵起手', '抱一下', '蹭一蹭', '拍拍肩膀'];
+window.openModal('摸一摸', '', (v) => {
+const a = TOUCH_ACTS[Number(v)];
+if (a) sendPoke(a);
+}, { noInput: true, pillSubmit: true, pills: TOUCH_ACTS.map((label, value) => ({ label: label, value: value })) });
 });
 }
 const rpsPanel = document.getElementById('chat-rps-panel');
