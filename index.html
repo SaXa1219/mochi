@@ -7369,6 +7369,63 @@ justify-content:safe center;
 .au-ed-foot { display:flex; align-items:center; justify-content:center; gap:10px; padding-bottom:2px; }
 .au-ed-foot .pong-overlay-btn { min-width:0; flex:1; }
 .au-ed-del { color:#ff8f8f !important; }
+.tfs { position:fixed; inset:0; z-index:9998; display:flex; flex-direction:column; color:var(--ink);
+background:linear-gradient(168deg,var(--bg-a,#ffffff) 0%,var(--bg-b,#f2f2f2) 100%);
+padding:max(env(safe-area-inset-top,0px),10px) 14px max(var(--mochi-safe-bottom,env(safe-area-inset-bottom,0px)),12px);
+overscroll-behavior:none; }
+.tfs[hidden] { display:none; }
+.tfs-top { display:flex; align-items:center; gap:8px; flex-shrink:0; padding:2px 2px 6px; }
+.tfs-close { width:36px; height:36px; border:none; border-radius:50%; background:var(--static-bg,rgba(0,0,0,.05)); color:var(--ink); font-size:17px; cursor:pointer; flex-shrink:0; }
+.tfs-title { flex:1; text-align:center; font-size:16px; font-weight:600; }
+.tfs-tools { display:flex; gap:8px; align-items:center; }
+.tfs-tool { border:1px solid var(--pill-border,#ddd); background:var(--card-bg,#ffffff); color:var(--ink); border-radius:99px; padding:7px 12px; font-size:12.5px; cursor:pointer; }
+.tfs-tool.tfs-move { font-size:16px; padding:6px 11px; }
+.tfs-tool.tfs-move.on { background:#ff6f91; border-color:#ff6f91; color:#fff; transform:rotate(45deg); }
+.tfs-group-menu { position:absolute; top:52px; right:14px; z-index:8; max-height:46vh; overflow:auto; min-width:172px;
+background:var(--card-bg-97,#ffffff); border:1px solid var(--card-border); border-radius:14px; box-shadow:0 12px 34px rgba(0,0,0,.16); padding:6px; }
+.tfs-group-menu[hidden] { display:none; }
+.tfs-group-item { display:block; width:100%; text-align:left; border:none; background:none; color:var(--ink); border-radius:10px; padding:9px 11px; font-size:13px; cursor:pointer; }
+.tfs-group-item.on { background:rgba(255,111,145,.14); color:#ff4d6d; font-weight:600; }
+.tfs-group-empty { font-size:12px; color:var(--muted); padding:10px; }
+.tfs-body { flex:1; display:flex; align-items:center; gap:10px; min-height:0; }
+.tfs-photo { flex:1; align-self:stretch; position:relative; border-radius:50%/46%; border:1.5px solid var(--card-border);
+background:var(--static-bg) center/cover no-repeat; display:flex; align-items:center; justify-content:center; overflow:hidden; cursor:pointer; margin:4px 0; }
+.tfs-photo.has-img .tfs-photo-hint { display:none; }
+.tfs-photo.locked { cursor:default; }
+.tfs-photo-hint { font-size:13px; color:var(--muted); }
+.tfs-say { position:absolute; max-width:70%; background:rgba(255,111,145,.92); color:#fff; font-size:13.5px; line-height:1.5;
+padding:8px 12px; border-radius:14px; white-space:pre-line; box-shadow:0 6px 18px rgba(255,77,109,.3); pointer-events:none; }
+.tfs-say.pop { animation:tfsPop .35s ease; }
+@keyframes tfsPop { 0% { transform:scale(.6); opacity:0 } 100% { transform:scale(1); opacity:1 } }
+.tfs-bars { width:34%; flex-shrink:0; display:flex; flex-direction:column; gap:10px; padding:2px 0; }
+.tfs-bar { display:flex; flex-direction:column; gap:4px; }
+.tfs-bar-lb { font-size:11.5px; color:var(--muted); }
+.tfs-bar-track { height:16px; border-radius:99px; background:var(--track-bg,#e0e0e0); overflow:hidden; display:block; }
+.tfs-bar-fill { display:block; height:100%; width:0; border-radius:99px; transition:width .5s ease; }
+.tfs-bar-val { font-size:11px; color:var(--muted); text-align:right; }
+.tfs-caption { flex-shrink:0; text-align:center; font-size:13.5px; color:var(--soft-ink,#555); padding:8px 4px 4px; min-height:20px; }
+.tfs-chips { flex-shrink:0; display:flex; flex-wrap:wrap; gap:7px; justify-content:center; padding:2px 4px 6px; }
+.tfs-chip { border:1px solid var(--pill-border,#ddd); background:var(--card-bg,#ffffff); color:var(--ink); border-radius:99px; padding:6px 13px; font-size:12.5px; cursor:pointer; }
+.tfs-chip:active { background:rgba(255,111,145,.14); }
+.tfs-acts { flex-shrink:0; display:flex; justify-content:space-around; align-items:center; gap:6px; padding:6px 2px 4px; }
+.tfs-act { width:56px; height:44px; border-radius:50%; border:1.5px solid var(--card-border); background:var(--card-bg,#ffffff); color:var(--ink); font-size:12.5px; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,.05); }
+.tfs-act:active { transform:scale(.95); }
+.tfs-acts.moving { outline:1.5px dashed #ff6f91; outline-offset:4px; border-radius:16px; touch-action:none; }
+.tfs-invite { position:absolute; inset:0; z-index:10; display:flex; align-items:center; justify-content:center; background:var(--overlay-bg,rgba(0,0,0,.35)); }
+.tfs-invite[hidden] { display:none; }
+.tfs-invite-card { width:min(78%,300px); background:var(--card-bg-97,#ffffff); border-radius:18px; padding:22px 18px; text-align:center; box-shadow:0 18px 50px rgba(0,0,0,.25); }
+.tfs-invite-spin { width:30px; height:30px; margin:0 auto 12px; border:3px solid rgba(255,111,145,.25); border-top-color:#ff6f91; border-radius:50%; animation:tfsSpin .8s linear infinite; }
+.tfs-invite-spin[hidden] { display:none; }
+@keyframes tfsSpin { to { transform:rotate(360deg) } }
+.tfs-invite-txt { font-size:14px; line-height:1.6; color:var(--ink); white-space:pre-line; }
+.tfs-invite-ok { margin-top:14px; border:none; border-radius:99px; background:#ff6f91; color:#fff; padding:9px 22px; font-size:13px; cursor:pointer; }
+.tfs-invite-ok[hidden] { display:none; }
+.tfs-climax { position:absolute; inset:0; z-index:12; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; background:rgba(255,77,109,.28); backdrop-filter:blur(3px); }
+.tfs-climax[hidden] { display:none; }
+.tfs-climax-txt { font-size:34px; font-weight:700; color:#ff2d55; text-shadow:0 4px 20px rgba(255,45,85,.4); animation:tfsPop .4s ease; }
+.tfs-climax-sub { font-size:13px; color:var(--ink); }
+@media (max-height:640px) { .tfs-photo-hint { font-size:12px; } .tfs-act { width:50px; height:40px; font-size:11.5px; } }
+[data-theme="dark"] .tfs-photo { border-color:rgba(255,255,255,.14); }
 .msg-gift { align-self: center; width: 100%; display: flex; justify-content: center; margin: 8px 0; }
 .msg-gift-card {
 width: min(260px, 80vw); padding: 22px 18px 14px; border-radius: 20px; box-sizing: border-box;
@@ -10958,7 +11015,7 @@ font-family:inherit; padding:4px 2px; cursor:pointer; -webkit-tap-highlight-colo
            （名称+版号 / 部署时间+实时秒 / 版本检测行）收成一行；检测行随 ver-check.js 退役删除。
            data-build-ts / data-version 两属性保留：device.js 诊断、bg-keep 自检、pwa.js 旧包检测
            仍只读属性（诊断版本号走 data-version 兜底，device.js 两处缓存原生支持）。 -->
-      <div class="splash-ver" id="splash-ver" data-build-ts="1791190115453" data-version="v8.66">
+      <div class="splash-ver" id="splash-ver" data-build-ts="1791197008087" data-version="v8.66">
         <span class="sv-app">Mochi 字卡传讯 已完结停更</span>
       </div>
       <!-- v3.5.120：数据（IndexedDB 回填）加载完成前不显示「点击进入」按钮，
@@ -17837,7 +17894,7 @@ font-family:inherit; padding:4px 2px; cursor:pointer; -webkit-tap-highlight-colo
   // v3.5.123：readonly 起手（防 Chrome 密码弹条破坏表单签名）——这里立即解除，
   // 早于所有功能模块，任何设备都不会出现输入框不可用的情况
   (function () { var _ci = document.getElementById('chat-input'); if (_ci) _ci.readOnly = false; })();
-window.__jsErrors = window.__jsErrors || []; window.__mochiLoaded = window.__mochiLoaded || []; window.__mochiErrLoaded = window.__mochiErrLoaded || []; window.__mochiBootAt = Date.now(); window.__mochiJsFiles = ["device.js","idb.js","contacts.js","applock.js","card-lock.js","dcp-master.js","media-pool.js","storage-slim.js","perf-check.js","energy-check.js","flash-check.js","img-compress.js","img-ingest.js","clock.js","tabs.js","desktop-slider.js","quote-cards.js","personalize.js","chat.js","group-chat.js","chatcard.js","chat-settings.js","reply-settings.js","fav-settings.js","default-cards-data.js","dict-ext-data.js","default-cards.js","quote-spell.js","dream-free.js","mood-followup-data.js","mood-reply-cards.js","ta-mood-data.js","ta-mood.js","music-player.js","calendar.js","divination.js","avatar-lib.js","ta-ask.js","ck-question.js","incoming-requests.js","ta-invite.js","bg-keep.js","records.js","call.js","mail.js","feed.js","loc-lib.js","p2-features.js","gift-shop.js","memo-app.js","memo-arc.js","my-arc.js","period.js","accounting.js","garden.js","room.js","drift-bottle.js","decision.js","group-decision.js","pong.js","snake-game.js","breakout.js","connect-four.js","coop-mine.js","fishing.js","memory-game.js","gomoku.js","linkup.js","match3.js","auction.js","arcade.js","mood-diary.js","sfx.js","fullscreen.js","data-backup.js","feature-data.js","pwa.js","cjian.js","feature-hub.js","settings-help.js","onboarding.js","page-coach.js","card-audit.js","storage-guide.js","mobile-adapt.js"]; window.__mochiExtFiles = ["idb.js","contacts.js","applock.js","card-lock.js","dcp-master.js","media-pool.js","storage-slim.js","perf-check.js","energy-check.js","flash-check.js","img-compress.js","img-ingest.js","clock.js","tabs.js","desktop-slider.js","quote-cards.js","personalize.js","chat.js","group-chat.js","chatcard.js","chat-settings.js","reply-settings.js","fav-settings.js","default-cards-data.js","dict-ext-data.js","default-cards.js","quote-spell.js","dream-free.js","mood-followup-data.js","mood-reply-cards.js","ta-mood-data.js","ta-mood.js","music-player.js","calendar.js","divination.js","avatar-lib.js","ta-ask.js","ck-question.js","incoming-requests.js","ta-invite.js","bg-keep.js","records.js","call.js","mail.js","feed.js","loc-lib.js","p2-features.js","gift-shop.js","memo-app.js","memo-arc.js","my-arc.js","period.js","accounting.js","garden.js","room.js","drift-bottle.js","decision.js","group-decision.js","pong.js","snake-game.js","breakout.js","connect-four.js","coop-mine.js","fishing.js","memory-game.js","gomoku.js","linkup.js","match3.js","auction.js","arcade.js","mood-diary.js","sfx.js","fullscreen.js","data-backup.js","feature-data.js","cjian.js","feature-hub.js","settings-help.js","onboarding.js","page-coach.js","card-audit.js","storage-guide.js","mobile-adapt.js"];
+window.__jsErrors = window.__jsErrors || []; window.__mochiLoaded = window.__mochiLoaded || []; window.__mochiErrLoaded = window.__mochiErrLoaded || []; window.__mochiBootAt = Date.now(); window.__mochiJsFiles = ["device.js","idb.js","contacts.js","applock.js","card-lock.js","dcp-master.js","media-pool.js","storage-slim.js","perf-check.js","energy-check.js","flash-check.js","img-compress.js","img-ingest.js","clock.js","tabs.js","desktop-slider.js","quote-cards.js","personalize.js","chat.js","touch-fs.js","group-chat.js","chatcard.js","chat-settings.js","reply-settings.js","fav-settings.js","default-cards-data.js","dict-ext-data.js","default-cards.js","quote-spell.js","dream-free.js","mood-followup-data.js","mood-reply-cards.js","ta-mood-data.js","ta-mood.js","music-player.js","calendar.js","divination.js","avatar-lib.js","ta-ask.js","ck-question.js","incoming-requests.js","ta-invite.js","bg-keep.js","records.js","call.js","mail.js","feed.js","loc-lib.js","p2-features.js","gift-shop.js","memo-app.js","memo-arc.js","my-arc.js","period.js","accounting.js","garden.js","room.js","drift-bottle.js","decision.js","group-decision.js","pong.js","snake-game.js","breakout.js","connect-four.js","coop-mine.js","fishing.js","memory-game.js","gomoku.js","linkup.js","match3.js","auction.js","arcade.js","mood-diary.js","sfx.js","fullscreen.js","data-backup.js","feature-data.js","pwa.js","cjian.js","feature-hub.js","settings-help.js","onboarding.js","page-coach.js","card-audit.js","storage-guide.js","mobile-adapt.js"]; window.__mochiExtFiles = ["idb.js","contacts.js","applock.js","card-lock.js","dcp-master.js","media-pool.js","storage-slim.js","perf-check.js","energy-check.js","flash-check.js","img-compress.js","img-ingest.js","clock.js","tabs.js","desktop-slider.js","quote-cards.js","personalize.js","chat.js","touch-fs.js","group-chat.js","chatcard.js","chat-settings.js","reply-settings.js","fav-settings.js","default-cards-data.js","dict-ext-data.js","default-cards.js","quote-spell.js","dream-free.js","mood-followup-data.js","mood-reply-cards.js","ta-mood-data.js","ta-mood.js","music-player.js","calendar.js","divination.js","avatar-lib.js","ta-ask.js","ck-question.js","incoming-requests.js","ta-invite.js","bg-keep.js","records.js","call.js","mail.js","feed.js","loc-lib.js","p2-features.js","gift-shop.js","memo-app.js","memo-arc.js","my-arc.js","period.js","accounting.js","garden.js","room.js","drift-bottle.js","decision.js","group-decision.js","pong.js","snake-game.js","breakout.js","connect-four.js","coop-mine.js","fishing.js","memory-game.js","gomoku.js","linkup.js","match3.js","auction.js","arcade.js","mood-diary.js","sfx.js","fullscreen.js","data-backup.js","feature-data.js","cjian.js","feature-hub.js","settings-help.js","onboarding.js","page-coach.js","card-audit.js","storage-guide.js","mobile-adapt.js"];
 (function () { try {
 (function () {
 try { window.__jsErrors = window.__jsErrors || []; } catch (e0) {}
@@ -22670,6 +22727,7 @@ window.__mochiBootRetry = function () { try { location.reload(); } catch (e) {} 
 <script defer src="js/quote-cards.js" onerror="window.__mochiExtFail=(window.__mochiExtFail||[]).concat('quote-cards.js')"></script>
 <script defer src="js/personalize.js" onerror="window.__mochiExtFail=(window.__mochiExtFail||[]).concat('personalize.js')"></script>
 <script defer src="js/chat.js" onerror="window.__mochiExtFail=(window.__mochiExtFail||[]).concat('chat.js')"></script>
+<script defer src="js/touch-fs.js" onerror="window.__mochiExtFail=(window.__mochiExtFail||[]).concat('touch-fs.js')"></script>
 <script defer src="js/group-chat.js" onerror="window.__mochiExtFail=(window.__mochiExtFail||[]).concat('group-chat.js')"></script>
 <script defer src="js/chatcard.js" onerror="window.__mochiExtFail=(window.__mochiExtFail||[]).concat('chatcard.js')"></script>
 <script defer src="js/chat-settings.js" onerror="window.__mochiExtFail=(window.__mochiExtFail||[]).concat('chat-settings.js')"></script>
@@ -22756,4 +22814,4 @@ window.__mochiBootRetry = function () { try { location.reload(); } catch (e) {} 
 <!-- __MOCHI_EOF__ -->
 </body>
 </html>
-<!-- __MOCHI_EOF__ muv0cigt -->
+<!-- __MOCHI_EOF__ muv4g8uv -->

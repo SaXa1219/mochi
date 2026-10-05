@@ -2269,7 +2269,7 @@ document.addEventListener('contact-switched', syncBs);
 }
 const csVs = document.getElementById('cs-voice-send');
 if (csVs) {
-const vsGet = () => { try { return store.get('cs-voice-send') === '1'; } catch (e) { return false; } };
+const vsGet = () => { try { const v = store.get('cs-voice-send'); return v === null || v === undefined || v === '' ? true : v === '1'; } catch (e) { return true; } };
 const vsSet = (en) => { try { store.set('cs-voice-send', en ? '1' : '0'); } catch (e) {} };
 const syncVs = () => { const v = vsGet(); if (v !== csVs.checked) csVs.checked = v; };
 syncVs();

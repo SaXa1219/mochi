@@ -10218,9 +10218,18 @@ out.push({ key: g[0], label: g[0], cards: g[1].slice(), user: true });
 });
 return out;
 }
+// 摸一摸（js/touch-fs.js）取「亲亲」字卡组：打包「我的拍一拍」（预设＋自定义分组）
+// 与「公用拍一拍」分组，只回传 {key,label,cards}，不改动拍一拍面板任何状态。
+window.mochiTouchCardGroups = function () {
+try {
+const out = [];
+pokeTabGroups('mine').forEach(g => out.push({ key: 'mine:' + g.key, label: g.label, cards: (g.cards || []).slice() }));
+pokeTabGroups('public').forEach(g => out.push({ key: 'public:' + g.key, label: g.label, cards: (g.cards || []).slice() }));
+return out;
+} catch (e) { return []; }
+};
 function pokeCardEl(c, opts) {
 const d = document.createElement('div');
-d.className = 'cc-item glass';
 d.innerHTML = '<div class="cc-txt"><div class="t">' + c + '</div></div>';
 d.addEventListener('click', () => { sendPoke(c); closePokeCard(); });
 if (opts && opts.editable) {
@@ -10392,19 +10401,17 @@ e.stopPropagation();
 openPokeCard();
 });
 }
-// 摸一摸：互动面板入口。复用拍一拍的发送链路（sendPoke＝同一套 {me}/{ta} 占位与 TA 回拍逻辑），
-// 只换一组「摸」的动作短语；点选即发（pillSubmit），无需再点确定。
+// 摸一摸：进「全屏互动半框」（js/touch-fs.js）。改造前只是一组拍一拍短语弹窗，
+// 现改为：先邀请对方（可能被拒绝、每天最多 2 次）→ 同意后进全屏摸一摸界面。
+// touch-fs.js 在 jsFiles 中紧随 chat.js 之后加载，点击发生在加载之后，故可直接取用；
+// 万一未挂载（旧产物/加载失败）仍回退到原来的「摸一摸你」拍一拍，不留死按钮。
 const moreTouch = document.getElementById('more-touch');
 if (moreTouch) {
 moreTouch.addEventListener('click', (e) => {
 e.stopPropagation();
 if (morePanel) morePanel.hidden = true;
-if (!window.openModal) { sendPoke('摸一摸你'); return; }
-const TOUCH_ACTS = ['摸摸头', '捏捏脸', '戳戳脸颊', '揉揉头发', '牵起手', '抱一下', '蹭一蹭', '拍拍肩膀'];
-window.openModal('摸一摸', '', (v) => {
-const a = TOUCH_ACTS[Number(v)];
-if (a) sendPoke(a);
-}, { noInput: true, pillSubmit: true, pills: TOUCH_ACTS.map((label, value) => ({ label: label, value: value })) });
+if (typeof window.openTouchFs === 'function') { window.openTouchFs(); return; }
+sendPoke('摸一摸你');
 });
 }
 const rpsPanel = document.getElementById('chat-rps-panel');
@@ -15872,7 +15879,9 @@ let voiceStopping = false, voiceStopWatchdog = null, voiceStopSettled = false, v
 let voiceProbeSeq = 0; // FIX #1308 回执闸轮次号：内核那一窗的回话迟到时，只有「还是当前这一轮」才允许动面板
 let voiceStopTs = 0; // FIX #6xx 停止时刻钉死：慢壳 onstop 迟到/看门狗收尾时用「点停止那一刻」算时长，不再按结账瞬间 Date.now() 虚涨（报障：录 3 秒点结束卡住后变 20 秒）
 function voiceEnabled() {
-try { return store.get('cs-voice-send') === '1'; } catch (e) { return false; }
+// 输入栏「麦克风」按钮默认显示（需求：语音功能要一直在三个点的左边，点开即可录音→试听→发送）；
+// 用户在 聊天设置 → 功能 →「我可发送语音」显式关掉（存 '0'）时才隐藏。未设置过一律按开启。
+try { var v = store.get('cs-voice-send'); return v === null || v === undefined || v === '' ? true : v === '1'; } catch (e) { return true; }
 }
 function syncMicBtn() {
 if (micBtn) micBtn.style.display = voiceEnabled() ? '' : 'none';

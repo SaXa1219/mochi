@@ -2893,12 +2893,12 @@
     document.addEventListener('contact-switched', syncBs);
   }
 
-  // v3.16.x：「我可发送语音」开关——默认关闭，每联系人独立。开启后聊天输入栏左侧显示
-  // 「麦克风」按钮：点击打开录音半框，录完可试听并作为语音消息发送进聊天。
-  // 存 cs-voice-send，chat.js 读同一键控制按钮显隐与录音逻辑。
+  // v3.16.x：「我可发送语音」开关——每联系人独立，未设置过默认开启（输入栏「麦克风」按钮
+  // 默认就在三个点左边，点开可录音→试听→发送）。开启后聊天输入栏左侧显示「麦克风」按钮。
+  // 存 cs-voice-send，chat.js 读同一键控制按钮显隐与录音逻辑（同款「未设置＝开」口径）。
   const csVs = document.getElementById('cs-voice-send');
   if (csVs) {
-    const vsGet = () => { try { return store.get('cs-voice-send') === '1'; } catch (e) { return false; } };
+    const vsGet = () => { try { const v = store.get('cs-voice-send'); return v === null || v === undefined || v === '' ? true : v === '1'; } catch (e) { return true; } };
     const vsSet = (en) => { try { store.set('cs-voice-send', en ? '1' : '0'); } catch (e) {} };
     const syncVs = () => { const v = vsGet(); if (v !== csVs.checked) csVs.checked = v; };
     syncVs();
